@@ -1,0 +1,191 @@
+\documentclass[
+	english,
+	fontsize=10pt,
+	parskip=half,
+	titlepage=true,
+	DIV=12
+]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage[T1]	{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{color}
+\usepackage{csquotes}
+
+\usepackage{hyperref}
+
+\newcommand*{\tabcrlf}{\\ \hline}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage[arrowdel]{physics}
+\usepackage{mathtools}
+\usepackage{siunitx}
+
+\usepackage{minted}
+	\usemintedstyle{friendly}
+
+\newcommand*{\inPy}[1]{\mintinline{python3}{#1}}
+\newcommand*{\ie}{i.\,e.}
+\newcommand*{\eg}{e.\,g.}
+
+\begin{document}
+
+\part*{Python Problems 02, Summer 2021}
+
+In this problem paper we'll first understand and implement a tree structure, and then make it so that we can iterate over all elements of our tree with a single \inPy{for} loop. This requires recursive thinking, so be prepared for \emph{some brain bending action}. It took me an hour to get it right and you might find it rather challenging. However, I still remember when I first attempted implementing such a tree structure of arbitrary depth. I was some 15 years at that point, \ie a horrible wiseguy of an adolescent. My language of choice at that time (freeBASIC) didn't offer as much comfort as we are used from Python, but after sinking a day's effort into it, I had wrought a Tree Class from nothing other than my brain capacity, and was mighty proud of it. In the following years I would frequently re-use the Tree class in a number of projects, ever thankful I didn't have to do it again.
+
+So, if you struggle with this, think of two things:
+\begin{itemize}
+\item You may use this piece of code later on for own projects, whenever a tree structure is needed\footnote{Of course, you can always look for a ready made Python 
+	library such as \url{https://treelib.readthedocs.io/en/latest/}, but there's nothing like having it done yourself!}
+\item A sneering teenager who wasn't even wearing a berret yet would condescendingly look at you and say something like \enquote{Oh, I know, it is \emph{a little
+	tricky}.} Don't do that wiseguy bastard from the early 2k's the favour of giving up!
+\end{itemize}
+
+\section{Definition of a Tree}
+A tree structure is a hierarchical ordering of information. It comprises of
+\begin{itemize}
+\item \emph{One} root element
+\item \emph{Any count} (including zero) of subtrees.
+\end{itemize}
+A subtree is a complete tree in its own right. We also call the root as well as the roots of the subtrees \emph{nodes}. Nodes without any subtrees are called \emph{leafs}
+
+Since we are Programming nerds and never leave our basement room, we have never seen a tree in real life; therefore, we assume the root is on top, and the tree grows downwards. So we may picture a tree like this:
+\begin{minted}{text}
+root
+ +-- root_subtree_1
+ |    +-- root_subtree_1_1
+ |    +-- root_subtree_1_2
+ |    +-- root_subtree_1_3
+ +-- root_subtree_2
+ +-- root_subtree_3
+      +-- root_subtree_3_1
+      |    + root_subtree_4_1
+      +-- root_subtree_3_2
+\end{minted}
+In each line of this display of the tree we find exactly \emph{one} node. A node belongs to several trees at once, but if so, then one of them is completely contained in another. For example, the node \texttt{root\_subtree\_1\_1} is both, a part of the tree with root \texttt{root} and a part of the tree with root \texttt{root\_subtree\_1}. However, \texttt{root\_subtree\_1} is \emph{completely} containt in \texttt{root}. Note, that \texttt{root\_subtree\_1\_1} itself is a tree too. It, too, is \emph{completely} contained in \texttt{root} and in \texttt{root\_subtree\_1}.
+
+\section{Our Goal}
+We want to represent a tree structure in code in a way that makes it easy to work with it. In particular, we want to be able to iterate over the entire tree, while maintaining some of the hierarchical structure encoded in the Tree. In particular, this code:
+
+\begin{minted}[linenos]{python3}
+tree = Tree("files")
+
+for node in ("Documents", "Pictures", "Downloads", "Music", "Misc") :
+    tree.addNode(node)
+
+nodeDocs = tree[0]
+for node in ("Codes", "Ebooks", "Uni", "Bills and Money") :
+    nodeDocs.addNode(node)
+
+nodeMusic = tree[-2]
+for node in ("Dan Deacon", "Tocotronic", "Wir Sind Helden") :
+    nodeMusic.addNode(node)
+
+for node in ("Die Reklamation", "Von Hier An Blind", "Soundso", "Bring Mich Nach Hause") :
+    nodeMusic[-1].addNode(node)
+
+
+for indent, item in tree :
+    print("  " * indent, item, sep="")
+\end{minted}
+
+should give you the following output:
+\begin{minted}{text}
+files
+  Documents
+    Codes
+    Ebooks
+    Uni
+    Bills and Money
+  Pictures
+  Downloads
+  Music
+    Dan Deacon
+    Tocotronic
+    Wir Sind Helden
+      Die Reklamation
+      Von Hier An Blind
+      Soundso
+      Bring Mich Nach Hause
+\end{minted}
+
+To get there, follow the steps below.
+
+\section{Representing a Static Tree in Code}
+We represent the tree as a \inPy{class Tree} andbegin as usual by analyzing what data we need to handle and what methods we will need.
+
+There's nothing that \emph{all} instances of \texttt{Tree} have in common, so we need no class attributes.
+
+When we want to represent a tree in Code, we will need as instance attributes:
+\begin{itemize}
+\item the name (or data content) of the root element
+\item a \inPy{list} of the subtrees
+\end{itemize}
+
+Our Constructor should take the root data as argument and put it into the corresponding instance attribute. By default, a tree should be constructed without any subtrees; the root starts out as a leaf.
+
+For testing and debug, we'll want to be able to \inPy{print} instances of \texttt{Tree}. Therefore, we want the dunder \inPy{__str__} in our class. It should only return a string representation of the root name. That means, \inPy{print(tree)} should output only \texttt{files} on screen.
+
+We'll want to access the individual nodes of a tree by their index, so we'll want to have the dunders \inPy{__getitem__} and \inPy{__setitem__} ready. The former should return a handle to the entire subtree, while the latter should only change the root name of the selected subtree. That means, \inPy{print(tree[0])} should print \texttt{Documents} on screen, and \texttt{tree[3] = "Audible Soul Food"} should rename the node \texttt{Music} without affecting the nodes underneath it.
+
+Implement and test these methods first. For testing, you might want to manually construct a tree structure in memory or attempt the next subtask first.
+
+\section{Adding and Removing Subtrees}
+Now go about the method \texttt{addNode}. It should take one argument which is the root name of a new subtree.\\
+\emph{Optionally} you can also accept a second (optional) argument which is the index at which the new subtree is to be inserted. Omitting this argument should end in inserting the new subtree at the end of the list of subtrees.\\
+\emph{Optionally} you can make it so that your method also \enquote{understands} negative indices, \ie\\
+\texttt{tree.addNode("foo", -1)} should insert the new node \texttt{foo} \emph{before} the last element.
+
+\emph{Hint}:\\
+The \inPy{list} methods \texttt{append} and \texttt{insert} essentially do what you need.
+
+Also add the method \texttt{removeNode}. It requires the index of the node to be removed.\\
+\emph{Optionally} you can again make it so that negative indices are valid.
+
+Test both methods thoroughly.
+
+\section{Making the Tree an Iterable}
+\subsection{Skeletal Structure}
+Recall what is required for a class to be an iterable:
+\begin{itemize}
+\item The class needs to implement the dunder \inPy{__iter__}
+\item The dunder \inPy{__iter__} needs to return an object.
+\item The object returned by \inPy{__iter__} needs to have a dunder \inPy{__next__}
+\item At some point, \inPy{__iter__} should \inPy{raise StopIteration}
+\end{itemize}
+
+Create this skeletal, nonfunctional structure. If you did it correctly, then this code should run without aborting; of course, there will be no output yet:
+\begin{minted}[linenos]{python3}
+for x in tree :
+    print(x)
+\end{minted}
+
+\subsection{Analyzing Required Information}
+Recall: the object returned by \inPy{__iter__} is a helper object that keeps track of where in the iteration we are and what to output next. Do do its job, it nees to handle some information (\ie it needs some instance attributes):
+\begin{itemize}
+\item Which tree is iterated over
+\item Which node are we currently at
+\end{itemize}
+
+Since we made it so that our tree can be indexed, it is convenient to store these indices as a stand in for \emph{which node are we currently at}. Note that we sometimes need more than one index to identify a given node. For example, \texttt{Die Reklamation} has the indices \texttt{[3, 2, 0]}. \texttt{Wir Sind Helden} has the indices \texttt{[3, 2]}.
+
+Write the dunder \inPy{__init__} such that these two information are set up correctly. What should the initial state for \texttt{indices}?
+
+\subsection{Resolving Indices}
+Write now a function \texttt{resolveIndices} that finds the node identified by the instance attribute \texttt{indices} within \texttt{tree}.
+
+\subsection{Advancing Indices}
+Now comes the tricky part: write a function \texttt{advanceIndices}. Its job is to change the instance attribute \texttt{indices} such that after a call, it refers to the successor of the current node. That is, if \texttt{indices} was \texttt{[0, 0]} (refererring to \texttt{Codes}) before the call, it should be \texttt{[0, 1]} (referring to \texttt{Ebooks}) thereafter. If \texttt{indices} was \texttt{[0, 3]} (referring to \texttt{Bills and Money}) before the call, it should be \texttt{[1]} (referring to \texttt{Pictures}) thereafter.
+
+You might want to introduce additional instance attributes to achieve this goal.
+
+Make it such that, if it is not possible to advance \texttt{indices} further, \inPy{StopIteration} is \inPy{raise}d.
+
+\subsection{Putting it Together}
+Now that we have code that incrementally ticks through our tree-indices, and code that translates these indices into nodes, we can combine them to get a functional \inPy{__next__}. Remember, we wanted to \inPy{return level, node}. How can you get \texttt{level} from \texttt{indices}?
+\end{document}
