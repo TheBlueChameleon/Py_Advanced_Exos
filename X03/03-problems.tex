@@ -1,0 +1,170 @@
+\documentclass[
+	english,
+	fontsize=10pt,
+	parskip=half,
+	titlepage=true,
+	DIV=12
+]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage[T1]	{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{color}
+\usepackage{csquotes}
+
+\usepackage{hyperref}
+
+\newcommand*{\tabcrlf}{\\ \hline}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage[arrowdel]{physics}
+\usepackage{mathtools}
+\usepackage{siunitx}
+
+\usepackage{minted}
+	\usemintedstyle{friendly}
+
+\newcommand*{\inPy}[1]{\mintinline{python3}{#1}}
+\newcommand*{\ie}{i.\,e.}
+\newcommand*{\eg}{e.\,g.}
+
+\begin{document}
+
+\part*{Python Problems 03, Summer 2021}
+\section{Measure Runtime}
+Write a decorator \texttt{takeTime} that measures the execution time of an arbitrary function and prints the time elapsed in milliseconds on the screen. That is, make it so that this code works:
+
+\begin{minted}{python3}
+@takeTime
+def arraySum(array, start = 0, stop=None) :
+    return sum(array[start:stop])
+
+a = [i for i in range(20000)]
+
+print( arraySum(a) )
+\end{minted}
+
+and produces this output:
+
+\begin{minted}{text}
+Time elapsed: 0.2978669945150614 ms
+199990000
+\end{minted}
+
+\emph{Hint}:\\
+For short durations, \texttt{time.time} is subject to too much interference. Instead, use \texttt{time.perf\_counter}. Read up on the details here: \url{https://docs.python.org/3/library/time.html#time.perf_counter}.
+
+\section{Fibonacci Sequence}
+The Fibonacci sequence is defined recursively as follows:
+\begin{align*}
+	F_n = \begin{cases}
+		0 & \text{if } n = 0\\
+		1 & \text{if } n = 1\\
+		F_{n-1} + F_{n-2} & \text{else}
+	\end{cases}
+\end{align*}
+
+
+\subsection{Code Analysis}
+Convince yourself that the following code implements the above definition and that this implementation is in $\mathcal{O}( \exp(n) )$:
+\begin{minted}{python3}
+def fib (n) :
+    if type(n) != int :
+        raise TypeError("Fibonacci sequence only defined on positive integers")
+    if n < 0 :
+        raise ValueError("Fibonacci sequence only defined on positive integers")
+        
+    if   n == 0 : return 0
+    elif n == 1 : return 1
+    else : return fib(n - 1) + fib(n - 2)
+\end{minted}
+
+\emph{Note}:\\
+You might want to combine both the above tests into a single if block and make use of Python's short circuiting. In terms of runtime, this is in fact better. However note that convention is that you return \emph{different} error type: \inPy{TypeError} or \inPy{ValueError}.
+
+
+\subsection{Optimization: Buffer}
+By definition, you need to know $F_{n-1}$ and $F_{n-2}$ to find $F_n$. In order to find $F_{n-1}$, you need to know $F_{n-2}$. So, in the naive approach shown above, $F_{n-2}$ is computed \emph{twice}. This gets only worse as you descend the recursion tree. A remedy would be introducing a buffer: you manage a \inPy{list buffer} that stores each value for $F_n$ that has been computed so far. If a required value $F_k$ has been computed before, you use the value \texttt{buffer[k]}; otherwise, you compute $F_{k}$ as before \emph{and then you append the new result to your \texttt{buffer}}.
+
+Write a version \texttt{fibInternalBuffer} that implements this idea. What is the time complexity for this version of the Fibonacci algorithm?
+
+\emph{Hint}:\\
+Depending on your coding style, it might be advantageous to use a \inPy{dict} instead of a \inPy{list} for your \texttt{buffer}.
+
+
+\subsection{Decorator-Buffer}
+Now let's assume we have a function that takes long to evaluate and has \emph{no} exploitable internal structure like our \texttt{fib} from before. However, we need to evaluate it often, always for the same few arguments. We can still make use of the same idea: if the the function has already been evaluated for a given argument, return the buffered result, otherwise compute the result and store it in the buffer.
+
+Write a decorator that automatically attaches such a result buffer to a function that takes long to evaluate. You can test it with your \texttt{fib} code.
+
+\emph{Hint}:\\
+This code:
+
+\begin{minted}{python3}
+timedFib                = takeTime(             fib )
+timedFibInternalBuffer  = takeTime(fibInternalBuffer)
+timedFibResultBuffer    = takeTime(resultBuffer(fib))
+
+N = 30
+
+print("naive approach")
+print( timedFib(N) )
+print()
+
+print("internal buffer, first call")
+print( timedFibInternalBuffer(N) )
+print()
+
+print("internal buffer, second call")
+print( timedFibInternalBuffer(N) )
+print()
+
+print("result buffer, first call")
+print( timedFibResultBuffer(N) )
+print()
+
+print("result buffer, second call")
+print( timedFibResultBuffer(N) )
+\end{minted}
+
+produces this output:
+
+\begin{minted}{text}
+naive approach
+Time elapsed:  478.032 ms
+832040
+
+internal buffer, first call
+Time elapsed:    0.039 ms
+832040
+
+internal buffer, second call
+Time elapsed:    0.015 ms
+832040
+
+result buffer, first call
+Time elapsed:  464.956 ms
+832040
+
+result buffer, second call
+Time elapsed:    0.001 ms
+832040
+\end{minted}
+
+Why does the decorator solution yield no speedup when evaluating the function for the first time, even when we overwrite \texttt{fib = resultBuffer(fib)}? Why does the solution with an internal buffer take noticeably longer in the second invocation than the decorator solution?
+
+
+\subsection{Asymptotic Runtime Behaviour, Empirical}
+Measure, plot and interpret the runtime of the naive approach, the internal-buffer approach and the result-buffer approach after first and second invocation 
+\inPy{for n in range(35)}. For this, write a second version of \texttt{takeTime} that doesn't output the time requirement on screen but rather returns a \inPy{tuple} \texttt{(time\_in\_s, function\_result)}.
+
+Does this confirm your estimate for the time complexity?
+
+\emph{Note}:\\
+You'll notice that your plots are subject to quite some fluctuation. Moreover, they depend heavily on your plattform (hardware, operating system, background processes, ...). To reliably compare two algorithms, you'd need to \enquote{count} FLOPs. For the purpose of devellopment, however, simply measuring the time like we just did, is certainly good enough. Moreover, since we wrote a decorator solution, we can smack that onto any code we write in the future with no extra effort whatsoever!
+
+\end{document}
