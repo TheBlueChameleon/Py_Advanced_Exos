@@ -169,7 +169,7 @@ print()
 print("Measuring Runtime Behaviour. This may take some time...")
 
 
-N = 35
+N = 15
 
 timedFib                = takeAndReturnTime(             fib )
 timedFibInternalBuffer  = takeAndReturnTime(fibInternalBuffer)
@@ -240,3 +240,27 @@ plt.show()
 # Again: heavy fluctuations
 
 print("... done")
+
+# =========================================================================== #
+# Bonus content
+
+# in functools, the result buffer stuff is prebuilt and ready to use:
+# functools.lru_cache does essentially what we've seen above.
+
+import functools
+
+@takeAndReturnTime
+@functools.lru_cache
+def fib2 (n) :
+    if type(n) != int :
+        raise TypeError("Fibonacci sequence only defined on positive integers")
+    
+    if n < 0 :
+        raise ValueError("Fibonacci sequence only defined on positive integers")
+    
+    if   n == 0 : return 0
+    elif n == 1 : return 1
+    else : return fib(n - 1) + fib(n - 2)
+
+print( fib2(35) )
+print( fib2(35) )
