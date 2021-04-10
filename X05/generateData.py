@@ -44,3 +44,11 @@ with open("gaussian.csv", "w") as hlinear :
     
     for x, y in zip(X, Y) :
         print(x, y, sep=",", file=hlinear)
+
+# ---------------------------------------------------------------------------- #
+
+with open("logarithmic.csv", "w") as hlinear :
+    Y = [2 * math.log( 9 * x + 1 ) + rd.uniform(-0.5, 0.5) for x in X]
+    
+    for x, y in zip(X, Y) :
+        print(x, y, sep=",", file=hlinear)
