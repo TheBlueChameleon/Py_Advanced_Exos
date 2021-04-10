@@ -146,13 +146,13 @@ For two matrices\footnote{I'll assume them to be real valued; however, this work
 Let $A \in \mathbb{R}^{n \times m}$ and $B \in \mathbb{R}^{s \times t}$
 \begin{align*}
 	(A \ast B)_{\substack{
-		i = 1 ... n\\
-		j = 1 ... m
+		i = 1 ... n-r\\
+		j = 1 ... m-s
 	}}
 &=
 	\sum_{k = 1}^{r}
 	\sum_{l = 1}^{t}
-		A_{ij} B_{kl}
+		A_{i-k+1, j-l+1} B_{kl}
 \end{align*}
 
 With this formalism, we can express the Laplacian as a matrix:
@@ -197,7 +197,7 @@ The output should look like this:
  [  1   1  -2  -7 -39]]
 \end{minted}
 
-Why are the values in the top/bottom row and left/right column of the matrix garbabe?
+Why are the values in the top/bottom row and left/right column of the matrix garbage?
 
 \emph{Hint}:\\
 Have a look at the optional parameter \texttt{mode} in the documentation.

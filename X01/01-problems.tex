@@ -13,6 +13,7 @@
 \usepackage{microtype}
 \usepackage{color}
 \usepackage{csquotes}
+\usepackage{xspace}
 
 \usepackage{hyperref}
 
@@ -29,8 +30,8 @@
 	\usemintedstyle{friendly}
 
 \newcommand*{\inPy}[1]{\mintinline{python}{#1}}
-\newcommand*{\ie}{i.\,e.}
-\newcommand*{\eg}{e.\,g.}
+\newcommand*{\ie}{i.\,e.\xspace}
+\newcommand*{\eg}{e.\,g.\xspace}
 
 \begin{document}
 
@@ -113,7 +114,7 @@ Imagine you are maintaining a database like the one below:
 
 Assume that internally, last and first name are represented as strings, sex is represented as a boolean, department is an integer (\ie department ID) and join date is an interger, too (days since some \enquote{epoch date}). The database as a whole is available as a \inPy{list} of \inPy{dict}s.
 
-Write (pseudo-)code that returns the IDs of all women in the IT intelligence department whose last name starts with an A and who joined after 2005. Think about lazy evaluation to formulate this query in an efficient to evaluate way.
+Write (pseudo-)code that returns the IDs of all women in the IT department whose last name starts with an A and who joined after 2005. Think about lazy evaluation to formulate this query in an efficient to evaluate way.
 
 \section{Lazy Monte Carlo Integral}
 Evaluate the following integral:
