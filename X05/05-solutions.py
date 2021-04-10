@@ -17,6 +17,7 @@ from tkinter import messagebox
 
 # ============================================================================ #
 # definition of widgets layout
+
 # ---------------------------------------------------------------------------- #
 # the main window and its four compartments; globals
 
@@ -47,6 +48,7 @@ txts = dict()
 
 # ============================================================================ #
 # global variables
+
 # ---------------------------------------------------------------------------- #
 # fit type data
 
@@ -63,7 +65,6 @@ paramCount = {
     3 : 3,      # sinoidal
     4 : 3       # gaussian
 }
-
 
 currentFitParams = {
     "Label" : "Fit",
@@ -306,6 +307,7 @@ def doQuenches () :
 
 # ============================================================================ #
 # button callbacks and assignment, real data compartment
+
 # ---------------------------------------------------------------------------- #
 # Clear Data
 
@@ -458,6 +460,7 @@ btns["Set Fit Parameters"]["command"] = callback_SetFitParameters
 
 # ============================================================================ #
 # button callbacks and assignment, fit compartment
+
 # ---------------------------------------------------------------------------- #
 # Remove Fit
 
@@ -612,6 +615,7 @@ btns["View Fit Data"]["command"] = callback_ViewFitData
 
 # ============================================================================ #
 # button callbacks and assignment, Fourier compartment
+
 # ---------------------------------------------------------------------------- #
 # Quench
 
