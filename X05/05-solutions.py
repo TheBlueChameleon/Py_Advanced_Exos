@@ -60,10 +60,10 @@ polyDegree.set(1)
 
 paramCount = {
     0 : None,   # polynomial
-    1 : 2,      # exponential
-    2 : 2,      # logarithmic
-    3 : 3,      # sinoidal
-    4 : 3       # gaussian
+    1 : 4,      # exponential
+    2 : 4,      # logarithmic
+    3 : 4,      # sinoidal
+    4 : 4       # gaussian
 }
 
 currentFitParams = {
@@ -74,11 +74,11 @@ currentFitParams = {
 fits = []
 
 fitFunctions = [
-    lambda x, *params : np.polynomial.Polynomial(params)(x),
-    lambda x, a, b    : a * np.exp(b * x),
-    lambda x, a, b    : a * np.log(b * x),
-    lambda x, a, b, c : a * np.sin(b * x + c),
-    lambda x, a, b, c : a * np.exp(-b * (x - c)**2)
+    lambda x, *params    : np.polynomial.Polynomial(params)(x),
+    lambda x, a, b, c, d : a * np.exp( b * (x - c)   ) + d,
+    lambda x, a, b, c, d : a * np.log( b * (x - c)   ) + d,
+    lambda x, a, b, c, d : a * np.sin( b * (x - c)   ) + d,
+    lambda x, a, b, c, d : a * np.exp(-b * (x - c)**2) + d
 ]
 
 def setCurrentFitParams () :
@@ -91,7 +91,7 @@ def setCurrentFitParams () :
     N = paramCount[fitType.get()]
     if N == None :
         N = polyDegree.get() + 1
-    currentFitParams["Coeffs"] = [0 for i in range(N)]
+    currentFitParams["Coeffs"] = [1 for i in range(N)]
     
 setCurrentFitParams()
 
