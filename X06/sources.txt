@@ -1,0 +1,8 @@
+official
+https://www.cia.gov/the-world-factbook/about/archives/
+
+gen alt:
+https://github.com/factbook/factbook
+
+alt:
+https://github.com/thewiremonkey/factbook.csv

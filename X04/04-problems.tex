@@ -128,28 +128,28 @@ Likewise, for a 2D grid we can approximate the derivative as:
 	f_{ij} &= f(x_{ij}) \\
 	\Delta f^{(x)}_{ij} 
 &=
-	\frac{f_{i + 1, j} - f_{ij} + f_{i + 1, j} - f_{ij}}{\Delta x} \\
+	\frac{f_{i + 1, j} - f_{ij} + f_{i, j + 1} - f_{ij}}{\Delta x} \\
 &=
-	\frac{f_{i + 1, j} + f_{i + 1, j} - 2 f_{ij}}{\Delta x}
+	\frac{f_{i + 1, j} + f_{i, j + 1} - 2 f_{ij}}{\Delta x}
 \\
 	\Delta f^{(y)}_{ij} 
 &=
 	\frac{f_{i, j + 1} + f_{i, j + 1} - 2 f_{ij}}{\Delta x}
 \end{align*}
+(there, too, a symmetric form with better numerical performance exists, but I find this form easier to digest.)
 
+Of course, we can find an expression for the second derivative (\ie the Laplacian) in this formalism, too.
 
-Likewise, an expression for the second derivative can be found.
+Evaluating this second derivative could now be done by means of two nested \inPy{for} loops; for reasons of efficiency, however, we want to use a \emph{vectorized} approach: We'll do a \emph{convolution with a matrix}.
 
-This now could be done by means of two nested \inPy{for} loops; for reasons of efficiency, however, we want to use a \emph{vectorized} approach: We'll do a \emph{convolution with a matrix}.
-
-For two matrices\footnote{I'll assume them to be real valued; however, this works for any field $\mathbb{K}$ you fancy.} $A, B$, the convolution $A \ast B$, is defined as follows:\\
-Let $A \in \mathbb{R}^{n \times m}$ and $B \in \mathbb{R}^{s \times t}$
+For two matrices $A, B$, the convolution $A \ast B$, is defined as follows:\\
+Let\footnote{I'll assume them to be real valued; however, this works for any field $\mathbb{K}$ you fancy.} $A \in \mathbb{R}^{n \times m}$ and $B \in \mathbb{R}^{s \times t}$. Then:
 \begin{align*}
 	(A \ast B)_{\substack{
 		i = 1 ... n-r\\
 		j = 1 ... m-s
 	}}
-&=
+&\coloneqq
 	\sum_{k = 1}^{r}
 	\sum_{l = 1}^{t}
 		A_{i-k+1, j-l+1} B_{kl}

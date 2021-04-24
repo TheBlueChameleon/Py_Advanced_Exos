@@ -59,7 +59,7 @@
 #            \             /
 #             \     21    /
 # 
-# Let's for a momemt assume that there are N= 2^k summands in the list. Then 
+# Let's for a momemt assume that there are N = 2^k summands in the list. Then 
 # each recursion step reduces the number of summands by a factor of 2. We carry
 # on until there are only two summands left. Tham means, we go through 
 #     k = log_2(N)
@@ -182,7 +182,7 @@ plt.show()
 
 R = 15
 N = 100000
-evalRadius = (1 / alpha)**2
+evalRadius = (1 / alpha)
 
 # ........................................................................... #
 # brute force approach: sum up everything
@@ -192,10 +192,10 @@ for r in range(R) :
     # to be able to compare both methods, we have to include constructing the
     # grid into account. In general, we cannot assume this to be pre-made
     x = np.linspace(xMin, xMax, xRes)
-    y = np.linspace(yMin, yMax, xRes)
+    y = np.linspace(yMin, yMax, yRes)
     X, Y = np.meshgrid(x, y)
     
-    factor = (xMax - xMin) * (yMax - yMin) / X.size
+    factor = (xMax - xMin) * (yMax - yMin) / X.size   # ... / (xRes * yRes)
     
     # this is the actual integral, if you wish so
     Z = np.exp(-alpha * (X**2 + Y**2)) * np.abs(np.sin(omega_x * X) + np.sin(omega_y * Y))
@@ -212,12 +212,13 @@ tic = time.time()
 for r in range(R) :
     randX = np.random.uniform( low=xMin, high = xMax, size=N)
     randY = np.random.uniform( low=yMin, high = yMax, size=N)
-    toEvaluate = (randX**2 + randY**2) < evalRadius
+    toEvaluate = (randX**2 + randY**2) < evalRadius**2
     
     selectX = randX[toEvaluate]
     selectY = randY[toEvaluate]
     
     factor = (xMax - xMin) * (yMax - yMin) / N
+    # NOT ... / area(circle), unless you make it so that randX, randY are purely within that circle
     
     Z = np.exp(-alpha * (selectX**2 + selectY**2)) * np.abs(np.sin(omega_x * selectX) + np.sin(omega_y * selectY))
     integralMC = np.sum(Z) * factor
@@ -225,4 +226,8 @@ for r in range(R) :
 toc = time.time()
 integralMCTime = (toc - tic) / R
 
-print(f"direct integration: result = {integralMC:5.2f}, time requirement = {integralMCTime * 1000:6.2f} ms")
+print(f"MC integration    : result = {integralMC:5.2f}, time requirement = {integralMCTime * 1000:6.2f} ms")
+print()
+
+print(f"Speedup by choosing MC over direct: {integralDirectTime / integralMCTime:3.2f}")
+print(f"relative error MC                 : {100 * np.abs(integralMC - integralDirect) / integralDirect:3.2f}%")
