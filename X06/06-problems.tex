@@ -99,7 +99,7 @@ Write your code such that you can define a \inPy{list relevantCategories = ["Are
 \section{Consolidating Data Frames and First Computations}
 Make it so that the data in \texttt{sources} gets packed together into a single \texttt{pd.DataFrame data} that can be indexed by its country name. Append the column \texttt{Pregnancy density} which should be computed according to the formula above.
 
-You will notice that the necessary data for this computation are not available for all countries. In such a case, pandas will store \texttt{NaN} (\emph{not a number}). Get rid of these void records by using the \texttt{dropna} method. Look up the documentation (\url{https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.dropna.html}) if you don't know how to do that.
+You will notice that the necessary data for this computation are not available for all countries. In such a case, pandas will store \texttt{NaN} (\emph{not a number}). Get rid of these void records by using the \texttt{dropna} method.
 
 The output of \inPy{print(data)} should look like this:
 \begin{center}
@@ -109,7 +109,7 @@ The output of \inPy{print(data)} should look like this:
 \section{Sorting and Binning}
 Sort the DataFrame by pregnancy density. Print on screen the lowest and highest pregnancy densities.
 
-Now, find out which countries have approximately the same pregnancy density. That is, group them into bins specified by an intervall of pregnancy densities. To that end you can use \texttt{pd.cut} Use 30 logarithmically spaced bins, and print on screen, how many nations fall within that bin.
+Now, find out which countries have approximately the same pregnancy density. That is, group them into bins specified by an intervall of pregnancy densities. To that end you can use \texttt{pd.cut}. Look up how that method works under \url{https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.cut.html}, or in the PDF documentation. Use 30 logarithmically spaced bins, and print on screen, how many nations fall within that bin.
 
 Also make it so that your code shows in which bin Germany (or any country you might be interested in) falls, and which other countries are in that class.
 
@@ -130,7 +130,7 @@ Compute the \emph{normalized pregnancy density}, \ie $\frac{\text{[Pregnancy den
 \begin{center}
 	\includegraphics[width=.7\linewidth]{./DataAnalysis}
 \end{center}
-This plot tells us that there seems to be a strong correlation between infant mortality rate and normalized pregnancy density; unemployment rate and education expenditure (\emph{percent} of GDP spent on education) show no trend. Can you uncover any non-obvious relations? Feel free to data-nerd around, but: don't get carried away ;)
+This plot tells us that there seems to be a strong correlation between infant mortality rate and normalized pregnancy density; a link between unemployment rate pregnancy density is debatable and education expenditure (\emph{percent} of GDP spent on education) seems to show no trend. Can you uncover any non-obvious relations? Feel free to data-nerd around, but: don't get carried away ;)
 
 \begin{center}
 	\includegraphics[width=.9\linewidth]{./xkcd-nerdSniping}

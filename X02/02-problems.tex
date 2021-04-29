@@ -13,6 +13,7 @@
 \usepackage{microtype}
 \usepackage{color}
 \usepackage{csquotes}
+\usepackage{xspace}
 
 \usepackage{hyperref}
 
@@ -29,8 +30,8 @@
 	\usemintedstyle{friendly}
 
 \newcommand*{\inPy}[1]{\mintinline{python3}{#1}}
-\newcommand*{\ie}{i.\,e.}
-\newcommand*{\eg}{e.\,g.}
+\newcommand*{\ie}{i.\,e.\xspace}
+\newcommand*{\eg}{e.\,g.\xspace}
 
 \begin{document}
 
@@ -112,12 +113,13 @@ files
       Von Hier An Blind
       Soundso
       Bring Mich Nach Hause
+  Misc
 \end{minted}
 
 To get there, follow the steps below.
 
 \section{Representing a Static Tree in Code}
-We represent the tree as a \inPy{class Tree} andbegin as usual by analyzing what data we need to handle and what methods we will need.
+We represent the tree as a \inPy{class Tree} and begin as usual by analyzing what data we need to handle and what methods we will need.
 
 There's nothing that \emph{all} instances of \texttt{Tree} have in common, so we need no class attributes.
 
@@ -160,7 +162,7 @@ Recall what is required for a class to be an iterable:
 \end{itemize}
 
 Create this skeletal, nonfunctional structure. If you did it correctly, then this code should run without aborting; of course, there will be no output yet:
-\begin{minted}[linenos]{python3}
+\begin{minted}{python3}
 for x in tree :
     print(x)
 \end{minted}

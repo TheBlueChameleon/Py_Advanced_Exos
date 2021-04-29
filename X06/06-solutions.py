@@ -1,3 +1,13 @@
+# Note that I only learned how to use pandas myself. I briefly skimmed the docs,
+# defined the problem you find in the exercise sheet and went about solving it.
+# The lecture notes were written thereafter, when I had a better grasp of the
+# methods and functions offered by pandas.
+# The below code works, but certainly is not perfect. See this as a chance to
+# out-do me, and send me your code if you think you found a more powerful
+# solution.
+
+# ============================================================================ #
+
 import matplotlib.pyplot as plt
 
 import numpy  as np

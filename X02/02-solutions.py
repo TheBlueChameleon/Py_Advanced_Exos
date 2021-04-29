@@ -54,6 +54,7 @@ class TreeIterator :
         self.indices  = []                   # where are we at right now?
         self.limits   = []                   # how many nodes are on the other levels in the current subtree?
         self.explore  = True                 # ugly hack... see below...
+        self.end      = False
         
     def resolveIndices (self) :
         currentNode = self.tree
@@ -64,6 +65,9 @@ class TreeIterator :
         return currentNode
     
     def advanceIndices (self) :
+        if self.end:
+            raise StopIteration
+        
         # first, try to go one level down:
         if self.explore :
             currentNode = self.resolveIndices()
@@ -83,11 +87,13 @@ class TreeIterator :
             
             # have we removed the last level? Then we're done!
             if len(self.indices) == 0 :
-                raise StopIteration
-            
+                self.end = True #raise StopIteration
+                return
             self.explore = False                           # and make it so that we go one step ahead in the level one above
                                                            # it could be we ascend more than one level this way, hence the
                                                            # bizarre mechanic with this boolean.
+                                                           #  #This is due to the posibility the the next node onn level down is itself a leave
+                                                           #  #But then we would go down 2 levels and not to the next node
             self.advanceIndices()
     
     def __next__ (self) :
@@ -95,7 +101,7 @@ class TreeIterator :
         
         reVal = currentNode.rootName
         level = len(self.indices)
-        
+       # print("test",reVal,level)
         self.advanceIndices()
         
         return level, reVal
