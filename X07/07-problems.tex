@@ -1,0 +1,125 @@
+\documentclass[
+	english,
+	fontsize=10pt,
+	parskip=half,
+	titlepage=true,
+	DIV=12
+]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage[T1]	{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{color}
+\usepackage{csquotes}
+\usepackage{xspace}
+
+\usepackage{hyperref}
+
+\newcommand*{\tabcrlf}{\\ \hline}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage[arrowdel]{physics}
+\usepackage{mathtools}
+\usepackage{siunitx}
+
+\usepackage{minted}
+	\usemintedstyle{friendly}
+
+\newcommand*{\inPy}[1]{\mintinline{python3}{#1}}
+\newcommand*{\ie}{i.\,e.\xspace}
+\newcommand*{\eg}{e.\,g.\xspace}
+
+\begin{document}
+
+\part*{Python Problems 07, Summer 2021}
+\section{File System Size Scan}
+Write a program that tells you, how much disk space is used by the files in a given directory and its subdirectories. The program should do both, sum up the file sizes within the directory, excluding subdirectories, and the total size of the directory including the files in the subdirectories. The output should recursively list this for all directories under the given start directory.
+
+\emph{Example:}\\
+Imagine, on your disk there is a folder named \texttt{Python-Exo-07} with these files:
+\begin{minted}{text}
+Python-Exo-07
+ + 07-problems.pdf         ( 89128 Bytes)
+ + 07-solutions.py         (  5134 Bytes)
+ + Folder-1
+ |  + notes.txt            (   314 Bytes)  
+ |  + funny.jpg            (155964 Bytes)
+ + Folder-2
+    + world-domination.txt (     3 Bytes)
+    + Folder-2-1
+      + I-love-Python.dat  (   666 Bytes)
+\end{minted}
+
+Then your output should look like this:
+\begin{minted}{text}
+251209 Bytes in Python-Exo-07, thereof   94262 Bytes directly in the directory
+156278 Bytes in Folder-1     , thereof  156278 Bytes directly in the directory
+   669 Bytes in Folder-2     , thereof       3 Bytes directly in the directory
+   666 Bytes in Folder-2-1   , thereof     666 Bytes directly in the directory
+\end{minted}
+
+Make it so that the start folder can be passed as a command line parameter. For example, on my machine I can produce this console output:
+\begin{minted}[fontsize=\tiny]{text}
+blue-chameleon@blue-chameleon-HP-250-G7-Notebook-PC:~/Documents/Uni/30-SHK/02-Python/04-Lecture-Py-Advanced-2021-SoSe$ 03-exos/X07/07-solutions.py 01-tex/
+Specified root directory:
+   01-tex/
+is a directory and will be used as root directory.
+not included in the scan.
+
+   8,767,351 bytes under '.                                  ', thereof    6,641,569 directly in the directory.
+      23,229 bytes under '_minted-01_main_efficiency         ', thereof       23,229 directly in the directory.
+      28,293 bytes under '_minted-02_main_iterators          ', thereof       28,293 directly in the directory.
+      38,679 bytes under '_minted-03_main_decorators         ', thereof       38,679 directly in the directory.
+      32,054 bytes under '_minted-04_main_SciPy              ', thereof       32,054 directly in the directory.
+      35,770 bytes under '_minted-05_main_tkInter            ', thereof       35,770 directly in the directory.
+      41,239 bytes under '_minted-06_main_pandas             ', thereof       41,239 directly in the directory.
+      29,468 bytes under '_minted-07_main_ossysglob          ', thereof       29,468 directly in the directory.
+   1,874,037 bytes under 'gfx                                ', thereof    1,874,037 directly in the directory.
+      23,013 bytes under 'sty                                ', thereof       23,013 directly in the directory.
+
+
+blue-chameleon@blue-chameleon-HP-250-G7-Notebook-PC:~/Documents/Uni/30-SHK/02-Python/04-Lecture-Py-Advanced-2021-SoSe$ 03-exos/X07/07-solutions.py doesNotExist
+Specified root directory:
+   doesNotExist
+is not a directory -- defaulting to CWD:
+   /home/blue-chameleon/Documents/Uni/30-SHK/02-Python/04-Lecture-Py-Advanced-2021-SoSe
+not included in the scan.
+
+ 408,151,277 bytes under '.                                  ', thereof      152,219 directly in the directory.
+     410,046 bytes under '00-blurb                           ', thereof       14,948 directly in the directory.
+     395,098 bytes under '00-blurb/base                      ', thereof      395,098 directly in the directory.
+   8,767,351 bytes under '01-tex                             ', thereof    6,641,569 directly in the directory.
+      23,229 bytes under '01-tex/_minted-01_main_efficiency  ', thereof       23,229 directly in the directory.
+      28,293 bytes under '01-tex/_minted-02_main_iterators   ', thereof       28,293 directly in the directory.
+      38,679 bytes under '01-tex/_minted-03_main_decorators  ', thereof       38,679 directly in the directory.
+      32,054 bytes under '01-tex/_minted-04_main_SciPy       ', thereof       32,054 directly in the directory.
+      35,770 bytes under '01-tex/_minted-05_main_tkInter     ', thereof       35,770 directly in the directory.
+      41,239 bytes under '01-tex/_minted-06_main_pandas      ', thereof       41,239 directly in the directory.
+      29,468 bytes under '01-tex/_minted-07_main_ossysglob   ', thereof       29,468 directly in the directory.
+   1,874,037 bytes under '01-tex/gfx                         ', thereof    1,874,037 directly in the directory.
+      23,013 bytes under '01-tex/sty                         ', thereof       23,013 directly in the directory.
+      70,043 bytes under '02-codes                           ', thereof       70,043 directly in the directory.
+   4,612,881 bytes under '03-exos                            ', thereof            0 directly in the directory.
+     703,049 bytes under '03-exos/X01                        ', thereof      680,499 directly in the directory.
+      22,550 bytes under '03-exos/X01/_minted-01-problems    ', thereof       22,550 directly in the directory.
+     360,760 bytes under '03-exos/X02                        ', thereof      338,616 directly in the directory.
+      22,144 bytes under '03-exos/X02/_minted-02-problems    ', thereof       22,144 directly in the directory.
+     372,772 bytes under '03-exos/X03                        ', thereof      351,152 directly in the directory.
+      21,620 bytes under '03-exos/X03/_minted-03-problems    ', thereof       21,620 directly in the directory.
+     598,217 bytes under '03-exos/X04                        ', thereof      577,641 directly in the directory.
+      20,576 bytes under '03-exos/X04/_minted-04-problems    ', thereof       20,576 directly in the directory.
+     687,529 bytes under '03-exos/X05                        ', thereof      669,479 directly in the directory.
+      18,050 bytes under '03-exos/X05/_minted-05-problems    ', thereof       18,050 directly in the directory.
+   1,881,642 bytes under '03-exos/X06                        ', thereof    1,553,104 directly in the directory.
+      17,922 bytes under '03-exos/X06/_minted-06-problems    ', thereof       17,922 directly in the directory.
+     310,616 bytes under '03-exos/X06/data                   ', thereof      310,616 directly in the directory.
+       8,912 bytes under '03-exos/X07                        ', thereof        5,842 directly in the directory.
+       3,070 bytes under '03-exos/X07/__pycache__            ', thereof        3,070 directly in the directory.
+ 394,138,737 bytes under '04-vids                            ', thereof  394,138,737 directly in the directory.
+\end{minted}
+
+\end{document}
