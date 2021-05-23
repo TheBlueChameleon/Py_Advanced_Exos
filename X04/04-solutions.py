@@ -271,7 +271,7 @@ T0 = T0.reshape(Nx * Ny)
 
 
 Nt = 100
-t = np.linspace(0, 100, Nt)
+t = np.linspace(0, 50, Nt)
 
 alpha = 5
 

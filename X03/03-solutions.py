@@ -20,6 +20,10 @@ def takeTime (func) :
 def arraySum(array, start = 0, stop=None) :
     return sum(array[start:stop])
 
+import timeit
+
+timeit.timeit("", ...)
+
 # --------------------------------------------------------------------------- #
 
 a = [i for i in range(20000)]
@@ -101,14 +105,14 @@ def fibInternalBuffer (n) :
 # ........................................................................... #
 
 def resultBuffer (func) :
-    buffer = dict()
+    buff = dict()
     
     def wrapper (n) :
-        if n in buffer :
-            return buffer[n]
+        if n in buff :
+            return buff[n]
         else :
             result = func(n)
-            buffer[n] = result
+            buff[n] = result
             return result
     
     return wrapper

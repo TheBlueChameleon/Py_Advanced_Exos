@@ -73,7 +73,7 @@ The (Fast) Fourier Transform is the core of JPEG compression: Instead of storing
 Numerically, find the trajectory of an object in a $^{1}/_{r}$ potential in 2D space! To do so, follow these steps:
 
 Understand the following differential equation:
-\[ \ddot{\vec{x}} = -\frac{1}{r} \frac{\vec{x}}{\abs{\vec{x}}} \]
+\[ \ddot{\vec{x}} = -\frac{1}{r^2} \frac{\vec{x}}{\abs{\vec{x}}} \]
 
 So we have a \emph{second order} differential equation in \emph{two components} (we are in 2D space). So in total we need to create a system of \emph{four first order differential equations}. Follow the scheme shown in the lecture and create a function that implements this system of equations.
 
@@ -146,11 +146,11 @@ For two matrices $A, B$, the convolution $A \ast B$, is defined as follows:\\
 Let\footnote{I'll assume them to be real valued; however, this works for any field $\mathbb{K}$ you fancy.} $A \in \mathbb{R}^{n \times m}$ and $B \in \mathbb{R}^{s \times t}$. Then:
 \begin{align*}
 	(A \ast B)_{\substack{
-		i = 1 ... n-r\\
-		j = 1 ... m-s
+		i = 1 ... n-s\\
+		j = 1 ... m-t
 	}}
 &\coloneqq
-	\sum_{k = 1}^{r}
+	\sum_{k = 1}^{s}
 	\sum_{l = 1}^{t}
 		A_{i-k+1, j-l+1} B_{kl}
 \end{align*}

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # ============================================================================ #
+# dependencies
 
 import os
 import sys
@@ -8,6 +9,9 @@ import glob
 import ctypes                                   # see "Additional Feature" block
 
 # ============================================================================ #
+# problem 1: File System Scan
+
+# ---------------------------------------------------------------------------- #
 # Additional Feature
 # Detection of hidden files
 # (This was neither in the lecture nor asked for on the problem paper.)
@@ -37,7 +41,7 @@ def has_hidden_attribute(filepath):
         result = False
     return result
 
-# ============================================================================ #
+# ---------------------------------------------------------------------------- #
 # Determine whether to use CWD or user specified directory as root directory
 # Include additional feature: if 2nd command line argument is 'includeHidden',
 # also scan for hidden files.
@@ -71,7 +75,7 @@ print("Hidden filesa are" +\
       "included in the scan.")
 print()
 
-# ============================================================================ #
+# ---------------------------------------------------------------------------- #
 # helper class: dict with default values
 # if a read access with a non-existing key is made, the defaultDict instantiates
 # the key with a default value
@@ -87,7 +91,7 @@ class defaultDict (dict) :
         
         return super().__getitem__(key)
 
-# ============================================================================ #
+# ---------------------------------------------------------------------------- #
 # recursively traverse the file system and sum up the sizes, with no regard of
 # the files in subdirectories
 
@@ -102,7 +106,7 @@ for currentDirectory in directories :
             if (includeHidden or not is_hidden(entry)) and entry.is_file() :
                 sizesLocal[os.path.relpath(currentDirectory, root)] += entry.stat().st_size
 
-# ============================================================================ #
+# ---------------------------------------------------------------------------- #
 # sum up file sizes for parent directories
 
 sizesAccumulated = defaultDict(0)
@@ -135,8 +139,18 @@ with os.scandir(root) as it:
             sizesAccumulated['.'] += sizesAccumulated[entry.name]
 
 
-# ============================================================================ #
+# ---------------------------------------------------------------------------- #
 # some nice output
 
 for path, size in sorted( sizesAccumulated.items() ) :
     print(f"{size:12,} bytes under '{path:35}', thereof {sizesLocal[path]:12,} directly in the directory.")
+
+# ============================================================================ #
+# remote controlling GROMOCKS
+
+for opt in ("3\n", "5\n", "7\n") :
+    process = os.popen("python3 gromocks.py settings.ini >> output.txt", "w")
+    process.write(opt)
+    process.close()
+    
+# ---------------------------------------------------------------------------- #

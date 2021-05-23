@@ -1,0 +1,159 @@
+\documentclass[
+	english,
+	fontsize=10pt,
+	parskip=half,
+	titlepage=true,
+	DIV=12
+]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage[T1]	{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{color}
+\usepackage{csquotes}
+\usepackage{xspace}
+
+\usepackage{hyperref}
+
+\newcommand*{\tabcrlf}{\\ \hline}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage[arrowdel]{physics}
+\usepackage{mathtools}
+\usepackage{siunitx}
+
+\usepackage{minted}
+	\usemintedstyle{friendly}
+
+
+\newcommand*{\inPy}[1]{\mintinline{python3}{#1}}
+\newcommand*{\ie}{i.\,e.\xspace}
+\newcommand*{\eg}{e.\,g.\xspace}
+
+\begin{document}
+
+\part*{Python Problems 08, Summer 2021}
+This time, we're going to reproduce 3blue1brown's classification NN for handwritten digits with keras. Training a NN is expensive, so we'll make it so that one script does all the learning. The trained model this script produces will then be written to file. This file will contain both, the model description as well as all learned weights and biases. That means, once we've learned how to discern the numbers we don't have to start the learning process again and again each time we want to categorize a picture. Instead, the \emph{using the NN} part will be implemented in a separate file.
+
+As training data we will use the same MNIST handwritten image data base as 3blue1brown, which is conveniently included in the keras package.
+
+\section{Testing your Setup}
+Make sure all required modules are installed and set up correctly on your machine. To do so, try to run the script \texttt{016-classifyWine.py} (cf. GRIPS, section Lecture Slides). Most likely, you'll get an errormessage, indicating one or several missing packages. Install them using the tools your machine offers (Anaconda Shell, PIP, ...). Be prepared to use your search engine of choice to look up error messages and find out how to properly install all modules. It's not uncommon that installing a package requires some tweaking and web research, and this \enquote{standard scenario} is a good training example for you.
+
+\section{Load the Pictures}
+The MNIST handwritten digits sample can be loaded as follows:
+
+\begin{minted}{python3}
+from keras.datasets import mnist
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+\end{minted}
+
+Have a look at the generated objects \texttt{X\_train}, ... and make sure you understand their internal structure! How many indices do they each have? What do the constituent numbers represent? What data types are all of these objects and their constituent numbers?
+
+Plot a few of the images in \texttt{X\_train} using matplotlib's \texttt{imshow} command:
+\begin{minted}{python3}
+plt.imshow(your_picture, cmap='gray', interpolation='none')
+\end{minted}
+
+\section{The Learning Script}
+\subsection{Double-Checking the Requirements}
+For this part of the project, you'll need the following modules:
+\begin{minted}[linenos]{python3}
+# Our "standard libraries"
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+# Deep Learning Classes and functions
+from keras.datasets import mnist
+from keras.models   import Sequential
+from keras.layers   import Dense, Activation, Dropout
+from keras.utils    import np_utils
+\end{minted}
+
+Make sure you can import these modules, and install missing components if necessary
+
+\subsection{Data Preprocessing}
+NNs work best, if the activation of input and output has (roughly) the same magnitude. (Remember: activation refers to the numbers we put into our NN or get out of it, respectively). Rescale the input data such that they are represented by values between \texttt{0.0} and \texttt{1.0}.
+
+Remember also that we need input and output \emph{vectors}. As given, the MNIST data are input \emph{matrices} and output \emph{scalars}. Make it so that the input data are represented by 1D arrays of appropriate size, and that the labels (\texttt{y\_train}. \texttt{y\_test}) are represented as vectors of dimension \texttt{(10,)}. If \texttt{y\_train[i] == j}, then \texttt{Y\_train[i, j] == 1} while all other components of \texttt{Y\_train[i]} should be \texttt{0}.
+
+\emph{Hint:}\\
+Look up \texttt{keras.np\_utils.to\_categorical}.
+
+\subsection{Defining the Model}
+We will use a NN with two hidden layers and one output layer. Just for the sake of it we will add the activation functions (ReLU and Softmax) as distinct layers rather than as components of the \texttt{Dense} layers. Also, we will add a \texttt{Dropout} layer.
+
+A \texttt{Dropout} layer\footnote{
+	\url{https://keras.io/api/layers/regularization_layers/dropout/}
+}
+randomly decides not to propagate the activations it was given, but to send a vector of zero activation instead. You can think of this layer as a \enquote{slack contact}. The reason behind introducing such a layer is that it helps prevent overfitting. That is, the extra portion noise makes the NN more robust and less specific to the training data.
+
+The softmax activation is a variation of the sigmoid function. Physicists know it as a partition function. Like the sigmoid, the output range is limited to the interval $(0, 1)$, but other than its cousin, in case of the softmax function the sum of all output activations is $1.0$. Hence, it can be used in our output layer to directly yield the probability of a picture representing a given digit. Read up on the difference between sigmoid and softmax online\footnote{
+	For example here:\\
+	\url{https://medium.com/arteos-ai/the-differences-between-sigmoid-and-softmax-activation-function-12adee8cf322}
+}.
+
+So, the entire model can be represented schematically as follows:\\
+\includegraphics[
+	width=\linewidth,
+	trim=0 380 0 60,			% trim=left bottom right top
+	clip
+]{./gfx/Sequence}
+
+To that end, call \texttt{model.add} with instances of \texttt{Dense}, \texttt{Activation} and \texttt{Dropout}. Look up the documentation\footnote{
+	\url{https://keras.io/api/layers/}
+} for details.
+
+Compile the NN with the line:
+\begin{minted}{python3}
+model.compile(
+    loss='categorical_crossentropy',
+    optimizer='adam',
+    metrics=['accuracy'],
+)
+\end{minted}
+
+
+\subsection{The Learning Process}
+Use the \texttt{model.fit} method to start the learning process. Store the return value in a variable \texttt{history}. This variable has the attribute \texttt{history}, which is a \inPy{dict} that encodes the learning progress. That means that \inPy{history.history['accuracy']} returns a list of the achieved accuracy in the training run over the epochs.
+
+Use the optional parameters \texttt{verbose = 2, validation\_data=(X\_test, Y\_test)} and try out different \texttt{batch\_size}s and numbers of \texttt{epoch}s. The optional parameter \texttt{verbose} tells keras how many optional information should be displayed on screen while training (where 2 is the most and 0 none at all). Providing \texttt{validation\_data} tests the model against the provided data points. The achieved accuracy per epoch can then be read from \texttt{history} with the key \texttt{val\_accuracy}.
+
+Plot the learning curve (epoch vs. accuracy) and vary the \texttt{batch\_size}s and numbers of \texttt{epoch}s until you get a good result (ca. $93\%$\footnote{
+	To get better accuracy, use more neurons per layer
+}
+) in a reasonable amount of time. When you found a good setup, save your model on the hard disk with the command \inPy{model.save('path_to_file')}.
+
+\section{The Application Script}
+Now, begin a new Python script in which you make use of your work.
+
+\subsection{Data Source}
+Unless you want to feed your own handwritten pictures of size $28 \times 28$ into your script, use the same MNIST data sample you already used in training. Don't forget the Preconditioning! You will need these modules:
+\begin{minted}[linenos]{python3}
+# Our "standard libraries"
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+# Deep Learning Classes and functions
+from keras.datasets import mnist
+from keras.models   import load_model
+from keras.utils    import np_utils
+\end{minted}
+
+\subsection{Loading and Using the Trained Model}
+With \texttt{model = load\_model(model\_path)} you load the model from the previous task back into memory. Use the method \texttt{evaluate} to get the accuracy of the predictions your model makes. Then, do a manual analysis:
+
+Calling \texttt{model.predict(X\_test)} returns a list of result vectors. Find out manually how many of these predictions are correct. Show \emph{some} of the incorrect predictions together with the guessed and correct labels using \texttt{plt.imshow}.
+
+\section{Feel the Power}
+Take a step back and realize what a powerful tool you have at your hands now: The same 500-ish lines of code you just produced can be used as a basis for virtually \emph{any} classification problem you may encounter!
+
+And now that you feel the urge of using your new-found power to overthrow everything, watch this attempt at practical use of a NN:
+\url{https://youtu.be/OeFujF6LdAM} (13:20 min). (Or do whatever you wanted -- this video won't teach you anything about Python :P)
+\end{document}

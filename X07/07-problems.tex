@@ -122,4 +122,30 @@ not included in the scan.
  394,138,737 bytes under '04-vids                            ', thereof  394,138,737 directly in the directory.
 \end{minted}
 
+\section{Remote Controling Software}
+Should you ever decide to take the course \emph{Introduction to Molecular Dynamics (Theory and Modelling of Fluids)}, you'll be required to work with the software package \emph{GROMACS}\footnote{which places delightful notes in its log files, such as \emph{GROMACS reminds you: "If Life Seems Jolly Rotten, There's Something You've Forgotten !" (Monty Python)}}. The package runs molecular dynamics simulations and allows you to extract all kinds of physically interesting properties from the recorded simulations. To that end, the user has to enter several options in the running program on their keyboard.
+
+This approach makes it intuitive to use, but hard to automate. Imagine you want to run the same simulation over and over again, with only one parameter altered in each run. This can be done easily with a \inPy{for} loop; however, the execution pauses each time when user input is required. Since a single run can take several minutes, you would need to stay on the computer the entire time, typing commands into the terminal every couple of minutes, unable to do anything productive with your time otherwise.
+
+The described scenario is not unique to GROMACS, but can happen rather frequently when you use scientific software packages. Turbomole is just another example of software that does this.
+
+Luckily, the user input is recorded via the \texttt{stdin} device, which means we can feed input from another program. We want to do exactly that.
+
+You probably don't want to install (and learn to use) GROMACS for a single exercise problem; for that reason, you'll find the file \texttt{gromocks.py} on GRIPS which simulates the behaviour of GROMACS on your computer. You can start it from command line like this:
+\begin{center}
+	\texttt{python3 gromocks.py [options]}
+\end{center}
+
+The original GROMACS expects a variety of \texttt{options}. For here, let's assume that the only command line argument is a file name, specifying all other settings. Let's also assume you have the file \texttt{settings.ini} on your hard disk. Then
+\begin{center}
+	\texttt{python3 gromocks.py settings.ini}
+\end{center}
+would be a valid command.
+
+First, run \texttt{gromocks.py} from the command line to see how it behaves. Then, write a Python script that does the following:
+\begin{itemize}
+\item Start \texttt{gromocks.py} with the command line argument \texttt{settings.ini} three times in a row
+\item For each run of \texttt{gromocks.py}, sends the selection \texttt{3}, \texttt{5} or \texttt{7} to \texttt{gromocks.py} via stdin
+\item Takes the output of \texttt{gromocks.py} and \emph{appends} it to a file \texttt{logfile.txt}
+\end{itemize}
 \end{document}
