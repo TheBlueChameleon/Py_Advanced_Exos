@@ -1,0 +1,239 @@
+\documentclass[
+	english,
+	fontsize=10pt,
+	parskip=half,
+	titlepage=true,
+	DIV=12
+]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage[T1]	{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{color}
+\usepackage{csquotes}
+\usepackage{xspace}
+
+\usepackage{hyperref}
+
+\newcommand*{\tabcrlf}{\\ \hline}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage[arrowdel]{physics}
+\usepackage{mathtools}
+\usepackage{siunitx}
+
+\usepackage{minted}
+	\usemintedstyle{friendly}
+
+
+\newcommand*{\inPy}[1]{\mintinline{python3}{#1}}
+\newcommand*{\ie}{i.\,e.\xspace}
+\newcommand*{\eg}{e.\,g.\xspace}
+
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\perm}{perm}
+
+\begin{document}
+
+\part*{Python Problems 09, Summer 2021}
+\begin{center}
+\begin{Large}
+*** the last one ***
+\end{Large}
+\end{center}
+
+In this problem assignment, we'll attack the -- comparatively -- low complexity problem of computing the \emph{determinant and the permanent of a matrix} (see the definition below). Still, some counting and keeping track of indices is needed, and as humans we are very likely to get that wrong the first time. So we're going to try \emph{test driven devellopment}, \ie we'll write the tests first and then try write code that satisfies these tests.
+
+\section{Definitions}
+\subsection{Transposition}
+Given a list of objects (\eg numbers), a \emph{transposition of that list} is a copy of the list where any \emph{two} elements are swapped.
+
+\textbf{Example}:\\
+The list \texttt{1, 2, 3} has three transpositions:
+
+\begin{minipage}{.25\linewidth}
+	\begin{itemize}
+	\item \texttt{2, 1, 3}
+	\end{itemize}
+\end{minipage}
+%
+\begin{minipage}{.25\linewidth}
+	\begin{itemize}
+	\item \texttt{3, 2, 1}
+	\end{itemize}
+\end{minipage}
+%
+\begin{minipage}{.25\linewidth}
+	\begin{itemize}
+	\item \texttt{1, 3, 2}
+	\end{itemize}
+\end{minipage}
+
+On the other hand, \texttt{3, 1, 2} is \texttt{not} a transposition of \texttt{1, 2, 3} as more than two elements were shifted around.
+
+\subsection{Permutation}
+Given a list of objects (\eg numbers), \emph{permutation of that list} is any arrangement of the same objects. That means that all transpositions of a list are also permutations, but also arrangements where more than two objects are swapped. The copy of the list (with no elements swapped) is also considered a permutation. If a list has $N$ elements, then it will have $N!$ permutations.
+
+\textbf{Example}:\\
+The list \texttt{1, 2, 3} has six permuations:
+
+\begin{minipage}{.25\linewidth}
+	\begin{itemize}
+	\item \texttt{1, 2, 3}
+	\item \texttt{1, 3, 2}
+	\end{itemize}
+\end{minipage}
+%
+\begin{minipage}{.25\linewidth}
+	\begin{itemize}
+	\item \texttt{2, 1, 3}
+	\item \texttt{2, 3, 1}
+	\end{itemize}
+\end{minipage}
+%
+\begin{minipage}{.25\linewidth}
+	\begin{itemize}
+	\item \texttt{3, 1, 2}
+	\item \texttt{3, 2, 1}
+	\end{itemize}
+\end{minipage}
+
+\subsection{Signum of a Permuation}
+Any permutation $\sigma$ can be written as a \emph{concatenation} of transpositions $\tau_i$. The \emph{signum of a permutation} is either $+1$ if the number of transpositions is even, or it is $-1$ odd. Formally this is expressed as follows:
+
+\begin{align*}
+	\sigma &= \prod_{i=1}^n \tau_i
+&
+	\sgn(\sigma) &= (-1)^n
+\end{align*}
+
+\newpage
+\textbf{Examples}:\\
+Given the list \texttt{1, 2, 3}, ...
+\begin{itemize}
+\item the permutation \texttt{1, 3, 2} is obtained from the transposition that swaps the second and third place.
+	There is one transposition, thus the permutation is odd and its signum is -1.
+\item the permutation \texttt{3, 1, 2} is obtained from first swapping positions two and three and thereafter swapping positions one and two.
+	There are transpositions, thus the permutation is even and its signum is +1.
+\item the permutation \texttt{1, 2, 3} is a copy of the original.
+	There are no transpositions, thus the permutation is even and its signum is +1.
+\end{itemize}
+
+\subsection{Symmetric Group of Size $N$}
+The symmetric group of size $N$ is the set of all permutations of the list \texttt{1, 2, \ldots, N}. It is usually denoted by the symbol $S_N$.
+
+\textbf{Example}:\\
+In the Python notation (JSON), you could write the $S_3$ as:\\
+\inPy{S3 = [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]}
+
+\subsection{Permanent}
+Let $\mathbb{A} = \qty(a_{ij})_{i, j = 1, ..., N}$ be an $N \times N$ matrix. Then, the permanent is defined as:
+\begin{align*}
+	\perm(\mathbb{A}) = \sum_{\sigma \in S_N} \prod_{j=1}^N a_{j\sigma(j)}
+\end{align*}
+
+In this, $\sigma(j)$ indicates the matrix column given by j after applying the permutation $\sigma$.
+
+\textbf{Example}:\\
+Let there be a $2 \times 2$ matrx $\mathbb{A}$:
+\begin{align*}
+	\mathbb{A}
+&=
+	\mqty(
+		a_{11} & a_{12} \\
+		a_{21} & a_{22}
+	)
+\end{align*}
+For $N = 2$ we get for the symmetric group:
+\inPy{S2 = [[1, 2], [2, 1]]}
+
+Then the permanent is given by:
+\begin{align*}
+	\perm(\mathbb{A})
+&=
+	\sum_{\sigma \in S_2} \prod_{j=1}^2 a_{j\sigma(j)}
+=
+	\underbrace{
+		a_{1{\color{blue}1}} a_{2{\color{blue}2}}
+	}_{\sigma = {\color{blue}\texttt{[1, 2]}}}
+	+
+	\underbrace{
+		a_{1{\color{blue}2}} a_{2{\color{blue}1}}
+	}_{\sigma = {\color{blue}\texttt{[2, 1]}}}
+\end{align*}
+
+\subsection{Determinant}
+Let $\mathbb{A} = \qty(a_{ij})_{i, j = 1, ..., N}$ be an $N \times N$ matrix. Then, the determinant is defined as:
+\begin{align*}
+	\det(\mathbb{A}) = \sum_{\sigma \in S_N} \sgn(\sigma) \prod_{j=1}^N a_{j\sigma(j)}
+\end{align*}
+That is, the definition is just like that of the permanent, but every other term is \emph{subtracted} instead of added.
+
+\textbf{Example}:\\
+Let there be the same $2 \times 2$ matrx $\mathbb{A}$ as before. Then the determinant is given by:
+\begin{align*}
+	\det(\mathbb{A})
+&=
+	\sum_{\sigma \in S_2} \sgn(\sigma) \prod_{j=1}^2 a_{j\sigma(j)}
+=
+	\underbrace{
+		{\color{blue}(+1)} a_{11} a_{22}
+	}_{\substack{
+		\sigma = \texttt{[1, 2]}\\
+		{\color{blue}\sgn(\sigma) = +1}
+	}}
+	+
+	\underbrace{
+		{\color{blue}(-1)} a_{12} a_{21}
+	}_{\substack{
+		\sigma = \texttt{[2, 1]}\\
+		{\color{blue}\sgn(\sigma) = -1}
+	}}
+\end{align*}
+
+\section{Implementation}
+Write code that computes the permanent of an arbitrary square matrix $\mathbb{A}$. Decide for yourself, which data type and format you prefer for representing the matrix $\mathbb{A}$ in memory. 
+
+Do so by writing a first function \texttt{allPermutations(N)} that computes $S_N$ It is convenient to begin counting at \inPy{0}. That means, make it so that 
+\texttt{allPermutations(2) = [[0,1], [1,0]]} rather than \texttt{allPermutations(2) = [[1,2], [2,1]]}. Like that, you can use the elements of the returned object directly as indices in the definition of the permanent.
+
+\emph{Before} you begin writing the actual code, design tests for your functions. Think of what (reasonable and meaningless) input a user might plug into your functions and what it \emph{should} do. Only if you think the behaviour of a function is properly specified, go about really implementing it. Use any method for designing the test that you deem fit for the task (doctest, unittest, other modules, manual testing).
+
+\textbf{Note:}\\
+The pre-installed package \texttt{itertools} provides a function \texttt{permutations} that you can use to check your code.
+\begin{minted}{python3}
+from itertools import permutations
+a = [0, 1, 0, 2]
+perms = set(permutations(a))
+\end{minted}
+
+\textbf{Note:}\\
+The \emph{determinant} is already implemented in the NumPy submodule \texttt{numpy.linalg} as \texttt{numpy.linalg.det}. If you feel like doing so, you can implement it yourself, according to the above definition. You'll need the signum of a permutation. On this page you can find a Matlab code that does exactly that, and that you can easily translate to Python:
+\url{https://math.stackexchange.com/questions/65923/how-does-one-compute-the-sign-of-a-permutation}
+
+\section{Documentation}
+If you didn't already, add type hints and docstrings. You can use this code file as the beginning of a collection of routines. In that case, write a docstring for the module. You could format it like the output of \texttt{help(math)}. Also, see this task as an incentive to upload it to github or try out doxygen.
+
+\section{Background}
+\subsection{What are they good for?}
+The \emph{determinant} pops up in all sorts of mathematical scenarios. One case is for deciding whether or not a system of linear equations is solveable or not. If (and only if) so, the determinant of the coefficient matrix is \emph{nonzero}. Further an matrix is invertible if and only if its determinant is nonzero. If the columns of a matrix form a basis, then the determinant of that matrix gives the volume of the unit cell described by this basis. In less technical terms, this means: Think of a parallelepiped (\url{https://en.wikipedia.org/wiki/Parallelepiped}). The determinant of a matrix whose columns are given by the three vectors that span the parallelepiped is equal to its volume. This also holds for the $N$-dimensional generalization of a parallelepiped as well. Finally in quantum mechanics, many-particle wave functions can be found
+
+The \emph{permanent} does not have a geometric interpretation. It is mostly used in combinatorics, for example for computing bipartite graphs. Further, the permanent is the bosonic counterpart to the Slater determinant.
+
+\subsection{Computational Complexity}
+Evaluating the given definitions for both, the determinant and the permanent takes $\mathcal{O}(N!N)$ floating point operations, as there are $N!$ permutation to sum over, and per permutation $N-1$ multiplications have to be performed. In brief, evaluating either of them according to their definition takes \emph{a metric f*ckton} of time.
+
+For the determinant, luckily, it is possible to do some tricks\footnote{To be precise, one has to compute an LU decomposition of the matrix and then multipliy the products of the diagonal elements of the L and U matrices. The \emph{Numerics} lecture of UR explains this in detail.} and find the determinant of  an $N \times N$ matrix in a mere $\mathcal{O}(N^3)$ FLOPs. For the permanent, on the other hand, the best known algorithm takes $\mathcal{O}(2^{N-1} N^2) \approx \mathcal{O}(\exp(N))$ FLOPs -- still a whole lot.
+
+In my physics master thesis, I explore means to use quantum systems to \enquote{compute} the permanent of a matrix by measuring a transition probability between two states described by a complex valued matrix $\mathbb{A}$. Exploiting quantum effects to compute expressions that would take much longer on a classical computer is known as \emph{quantum supremacy} -- maybe you've heard the fuzz in October 2019 when google announced they had achieved this.
+
+As of now, the state of the art (as far as made known to the public) are proofs of concept: machines that, in theory, could perform operations such as computing the permanent are possible, but \emph{extremely difficult} to scale. While they may work for $N = 2..5$, the machines usually become too unstable beyond, making them unusable. However, it can be anticipated that in a few years from now, ever bigger systems can be built reliably.
+
+This is huge, for two reasons:\\
+For one, it simply allows for extremely fast computers (albeit not necessarily \emph{home computers}) that will advance the progress of science by leaps and bounds;\\
+and on the other hand (the scary one), this will render the current system of cryptography virtually useless as encryption keys could be found in fractions of a second. Read about Public-key cryptography and Shor's algorithm if you are interested.
+\end{document}
