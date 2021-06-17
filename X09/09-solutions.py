@@ -148,7 +148,7 @@ def signumOfPerm(P : list) -> int :
     return sgn
 
 # ............................................................................ #
-def determinant (M) :
+def determinant (M : np.ndarray) :
     """
     computes the determinant of a matrix M
 
