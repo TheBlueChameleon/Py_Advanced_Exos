@@ -49,6 +49,8 @@ def has_hidden_attribute(filepath):
 # Note that there is a module dedicated to parsing command line arguments:
 # https://docs.python.org/3/library/argparse.html
 
+print(sys.argv)
+
 root = ""
 if len(sys.argv) == 1 :
     root = os.getcwd()
